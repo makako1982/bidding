@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>薪資指數調整計算機</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #34495e;
+            --accent-color: #3498db;
+            --bg-color: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+        body {
+            font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .form-group label {
+            flex: 0 0 250px;
+            font-weight: bold;
+        }
+        .form-group input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-group .hint {
+            flex: 100%;
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 5px;
+            margin-left: 250px;
+        }
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 14px;
+            margin-left: 10px;
+            background-color: #95a5a6;
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-small:hover {
+            background-color: #7f8c8d;
+        }
+        /* 查詢按鈕特別使用主色調 */
+        .btn-link {
+            background-color: var(--accent-color);
+        }
+        .btn-link:hover {
+            background-color: #2980b9;
+        }
+        .result-box {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e8f4f8;
+            border-left: 5px solid var(--accent-color);
+            border-radius: 4px;
+            display: none;
+        }
+        .result-box h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        .result-text {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .calculation-process {
+            background: #fff;
+            padding: 15px;
+            border: 1px dashed var(--border-color);
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .note {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #e74c3c;
+            background: #fadbd8;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>薪資指數調整計算機</h1>
+    
+    <div style="background:#f1f2f6; padding:15px; margin-bottom:20px; border-radius:4px; font-size:0.9em;">
+        <strong>公式說明：</strong> 調整金額 = A × (|D| - E) × F<br>
+        D = (B / C - 1) × 100%<br>
+        ※ 當 |D| ≤ E 時，不予調整。
+    </div>
+
+    <div class="form-group">
+        <label for="contractPrice">服務項目契約價金</label>
+        <div style="display: flex; flex: 1;">
+            <input type="number" id="contractPrice" placeholder="請輸入金額 (選填)">
+            <button class="btn btn-small" onclick="calc70Percent()">自動帶入70%至A項</button>
+        </div>
+        <div class="hint">若無法明確區分薪資項目金額者，填入此項以快速計算 70%</div>
+    </div>
+
+    <div class="form-group">
+        <label for="valA">A.得調整之成本項目金額</label>
+        <input type="number" id="valA" placeholder="請輸入金額 (元)">
+    </div>
+
+    <div class="form-group">
+        <label for="valB">B.履約期間平均薪資指數</label>
+        <div style="display: flex; flex: 1;">
+            <input type="number" step="0.01" id="valB" placeholder="工作起月至迄月間平均">
+            <!-- 加入主計總處查詢系統連結，並設定 target="_blank" 另開新分頁 -->
+            <a href="https://earnings.dgbas.gov.tw/query_payroll.aspx" target="_blank" class="btn-small btn-link">前往查詢薪資指數</a>
+        </div>
+        <div class="hint">※ 逾期履約者，請依契約第五條第(五)款規定，取計價當期與履約期限當月「較低者」</div>
+    </div>
+
+    <div class="form-group">
+        <label for="valC">C.開標當月薪資指數</label>
+        <input type="number" step="0.01" id="valC" placeholder="開標當月指數">
+    </div>
+
+    <div class="form-group">
+        <label for="valE">E.調整門檻值 (%)</label>
+        <input type="number" step="0.01" id="valE" value="2.5">
+        <div class="hint">預設為 2.5%</div>
+    </div>
+
+    <div class="form-group">
+        <label for="valTax">營業稅率 (%)</label>
+        <input type="number" step="0.01" id="valTax" value="5">
+        <div class="hint">適用營業稅者為 5，不適用者請填 0</div>
+    </div>
+
+    <div style="text-align: center; margin-top: 20px;">
+        <button class="btn" onclick="calculate()">計算調整金額</button>
+    </div>
+
+    <div class="result-box" id="resultBox">
+        <h3>計算結果</h3>
+        <div class="result-text" id="finalResultText"></div>
+        <div class="calculation-process" id="calcProcess"></div>
+    </div>
+
+    <div class="note">
+        <strong>⚠️ 實務提醒：</strong><br>
+        1. 逾履約期限之部分，請特別注意「計價當期」與「原訂履約期限」薪資指數二者較低者的取用規定（不可歸責於廠商除外）。<br>
+        2. 若薪資調整款累計給付逾新臺幣 10 萬元，承辦人記得至工程會系統辦理「契約給付金額變更公告」。
+    </div>
+</div>
+
+<script>
+    function calc70Percent() {
+        const price = parseFloat(document.getElementById('contractPrice').value);
+        if (!isNaN(price) && price > 0) {
+            // 四捨五入至整數
+            document.getElementById('valA').value = Math.round(price * 0.7);
+        } else {
+            alert("請先輸入正確的「服務項目契約價金」！");
+        }
+    }
+
+    function calculate() {
+        const A = parseFloat(document.getElementById('valA').value);
+        const B = parseFloat(document.getElementById('valB').value);
+        const C = parseFloat(document.getElementById('valC').value);
+        const E = parseFloat(document.getElementById('valE').value);
+        const tax = parseFloat(document.getElementById('valTax').value);
+
+        if (isNaN(A) || isNaN(B) || isNaN(C) || isNaN(E) || isNaN(tax)) {
+            alert("請確認所有必要欄位 (A, B, C, E, 營業稅率) 均已填寫數字！");
+            return;
+        }
+
+        if (C === 0) {
+            alert("開標當月薪資指數 (C) 不可為 0！");
+            return;
+        }
+
+        // 計算 D：指數增減率 (%)
+        const D_raw = (B / C - 1) * 100;
+        // 四捨五入至小數點後四位作運算，避免浮點數誤差
+        const D = Math.round(D_raw * 10000) / 10000;
+        const absD = Math.abs(D);
+        
+        // 計算 F：1 + 營業稅率
+        const F = 1 + (tax / 100);
+
+        const resultBox = document.getElementById('resultBox');
+        const finalResultText = document.getElementById('finalResultText');
+        const calcProcess = document.getElementById('calcProcess');
+        
+        resultBox.style.display = 'block';
+
+        let processText = `[參數確認]\n`;
+        processText += `A (得調整金額) = ${A.toLocaleString()} 元\n`;
+        processText += `B (履約平均指數) = ${B}\n`;
+        processText += `C (開標當月指數) = ${C}\n`;
+        processText += `E (調整門檻) = ${E}%\n`;
+        processText += `F (稅率係數) = ${F}\n\n`;
+
+        processText += `[步驟一：計算指數增減率 D]\n`;
+        processText += `D = (B / C - 1) × 100%\n`;
+        processText += `  = (${B} / ${C} - 1) × 100%\n`;
+        processText += `  = ${D.toFixed(4)}%\n`;
+        processText += `絕對值 |D| = ${absD.toFixed(4)}%\n\n`;
+
+        if (absD <= E) {
+            finalResultText.innerHTML = `<span style="color:#e67e22;">不予調整</span>`;
+            finalResultText.innerHTML += `<div style="font-size:0.7em; font-weight:normal; margin-top:5px;">原因：指數增減率絕對值 (${absD.toFixed(4)}%) 未超過門檻值 (${E}%)</div>`;
+            
+            processText += `[步驟二：判斷是否達門檻]\n`;
+            processText += `因為 |D| (${absD.toFixed(4)}%) <= E (${E}%)\n`;
+            processText += `故依契約規定，不予調整契約價金。`;
+        } else {
+            // 計算調整金額：A × (|D| - E)% × F
+            const diffPercent = (absD - E) / 100;
+            const rawAmount = A * diffPercent * F;
+            const finalAmount = Math.round(rawAmount);
+
+            processText += `[步驟二：計算調整金額]\n`;
+            processText += `因 |D| (${absD.toFixed(4)}%) > E (${E}%)，達調整門檻。\n`;
+            processText += `調整金額 = A × (|D| - E)% × F\n`;
+            processText += `         = ${A} × (${absD.toFixed(4)}% - ${E}%) × ${F}\n`;
+            processText += `         = ${A} × ${diffPercent.toFixed(6)} × ${F}\n`;
+            processText += `         = ${rawAmount.toFixed(2)}\n`;
+            processText += `         ≒ ${finalAmount.toLocaleString()} 元 (四捨五入至整數)\n\n`;
+
+            if (D > 0) {
+                finalResultText.innerHTML = `<span style="color:#27ae60;">機關應「給付」乙方： ${finalAmount.toLocaleString()} 元</span>`;
+                processText += `[結論]\n指數增減率為正值，機關應給付調整金額 ${finalAmount.toLocaleString()} 元給廠商。`;
+            } else {
+                finalResultText.innerHTML = `<span style="color:#c0392b;">機關應「扣減」契約價金： ${finalAmount.toLocaleString()} 元</span>`;
+                processText += `[結論]\n指數增減率為負值，機關應從契約價金中扣減 ${finalAmount.toLocaleString()} 元。`;
+            }
+        }
+
+        calcProcess.textContent = processText;
+    }
+</script>
+
+</body>
+</html>
