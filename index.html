@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>薪資指數調整計算機</title>
     <style>
         :root {
@@ -12,12 +12,19 @@
             --bg-color: #f8f9fa;
             --border-color: #dee2e6;
         }
+        
+        /* 全域設定，確保 padding 不會撐破寬度 */
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--primary-color);
             line-height: 1.6;
-            padding: 20px;
+            padding: 15px;
+            margin: 0;
         }
         .container {
             max-width: 800px;
@@ -33,9 +40,10 @@
             border-bottom: 2px solid var(--accent-color);
             padding-bottom: 10px;
             margin-bottom: 30px;
+            font-size: 1.8rem;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             flex-wrap: wrap;
@@ -44,9 +52,18 @@
             flex: 0 0 250px;
             font-weight: bold;
         }
+        
+        /* 將輸入框與按鈕的組合包裝 */
+        .input-wrapper {
+            display: flex;
+            flex: 1;
+            gap: 10px; /* 元素之間的間距 */
+        }
+        
         .form-group input {
             flex: 1;
-            padding: 8px 12px;
+            width: 100%;
+            padding: 10px 12px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             font-size: 16px;
@@ -55,26 +72,27 @@
             flex: 100%;
             font-size: 0.85em;
             color: #6c757d;
-            margin-top: 5px;
+            margin-top: 6px;
             margin-left: 250px;
         }
         .btn {
             background-color: var(--accent-color);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 20px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s;
+            width: 100%;
+            max-width: 300px;
         }
         .btn:hover {
             background-color: #2980b9;
         }
         .btn-small {
-            padding: 5px 10px;
+            padding: 8px 12px;
             font-size: 14px;
-            margin-left: 10px;
             background-color: #95a5a6;
             color: white;
             text-decoration: none;
@@ -84,11 +102,11 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            white-space: nowrap; /* 避免按鈕文字折行 */
         }
         .btn-small:hover {
             background-color: #7f8c8d;
         }
-        /* 查詢按鈕特別使用主色調 */
         .btn-link {
             background-color: var(--accent-color);
         }
@@ -118,14 +136,40 @@
             border: 1px dashed var(--border-color);
             font-family: monospace;
             white-space: pre-wrap;
+            overflow-x: auto; /* 算式太長時可左右滑動 */
         }
         .note {
             margin-top: 20px;
             font-size: 0.9em;
             color: #e74c3c;
             background: #fadbd8;
-            padding: 10px;
+            padding: 15px;
             border-radius: 4px;
+        }
+
+        /* 響應式設計 (RWD) - 針對手機版螢幕 (寬度小於 768px) */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .form-group label {
+                flex: 0 0 100%;
+                margin-bottom: 8px;
+            }
+            .input-wrapper {
+                flex-direction: column; /* 輸入框與按鈕改為上下排列 */
+                width: 100%;
+            }
+            .form-group .hint {
+                margin-left: 0; /* 取消手機版的左側留白 */
+            }
+            .btn {
+                max-width: 100%; /* 計算按鈕在手機上滿版 */
+            }
         }
     </style>
 </head>
@@ -142,23 +186,24 @@
 
     <div class="form-group">
         <label for="contractPrice">服務項目契約價金</label>
-        <div style="display: flex; flex: 1;">
+        <div class="input-wrapper">
             <input type="number" id="contractPrice" placeholder="請輸入金額 (選填)">
-            <button class="btn btn-small" onclick="calc70Percent()">自動帶入70%至A項</button>
+            <button class="btn-small" onclick="calc70Percent()">自動帶入70%至A項</button>
         </div>
         <div class="hint">若無法明確區分薪資項目金額者，填入此項以快速計算 70%</div>
     </div>
 
     <div class="form-group">
         <label for="valA">A.得調整之成本項目金額</label>
-        <input type="number" id="valA" placeholder="請輸入金額 (元)">
+        <div class="input-wrapper">
+            <input type="number" id="valA" placeholder="請輸入金額 (元)">
+        </div>
     </div>
 
     <div class="form-group">
         <label for="valB">B.履約期間平均薪資指數</label>
-        <div style="display: flex; flex: 1;">
+        <div class="input-wrapper">
             <input type="number" step="0.01" id="valB" placeholder="工作起月至迄月間平均">
-            <!-- 加入主計總處查詢系統連結，並設定 target="_blank" 另開新分頁 -->
             <a href="https://earnings.dgbas.gov.tw/query_payroll.aspx" target="_blank" class="btn-small btn-link">前往查詢薪資指數</a>
         </div>
         <div class="hint">※ 逾期履約者，請依契約第五條第(五)款規定，取計價當期與履約期限當月「較低者」</div>
@@ -166,18 +211,24 @@
 
     <div class="form-group">
         <label for="valC">C.開標當月薪資指數</label>
-        <input type="number" step="0.01" id="valC" placeholder="開標當月指數">
+        <div class="input-wrapper">
+            <input type="number" step="0.01" id="valC" placeholder="開標當月指數">
+        </div>
     </div>
 
     <div class="form-group">
         <label for="valE">E.調整門檻值 (%)</label>
-        <input type="number" step="0.01" id="valE" value="2.5">
+        <div class="input-wrapper">
+            <input type="number" step="0.01" id="valE" value="2.5">
+        </div>
         <div class="hint">預設為 2.5%</div>
     </div>
 
     <div class="form-group">
         <label for="valTax">營業稅率 (%)</label>
-        <input type="number" step="0.01" id="valTax" value="5">
+        <div class="input-wrapper">
+            <input type="number" step="0.01" id="valTax" value="5">
+        </div>
         <div class="hint">適用營業稅者為 5，不適用者請填 0</div>
     </div>
 
@@ -192,7 +243,7 @@
     </div>
 
     <div class="note">
-        <strong>⚠️ 實務提醒：</strong><br>
+        <strong>⚠️️ 實務提醒：</strong><br>
         1. 逾履約期限之部分，請特別注意「計價當期」與「原訂履約期限」薪資指數二者較低者的取用規定（不可歸責於廠商除外）。<br>
         2. 若薪資調整款累計給付逾新臺幣 10 萬元，承辦人記得至工程會系統辦理「契約給付金額變更公告」。
     </div>
@@ -202,7 +253,6 @@
     function calc70Percent() {
         const price = parseFloat(document.getElementById('contractPrice').value);
         if (!isNaN(price) && price > 0) {
-            // 四捨五入至整數
             document.getElementById('valA').value = Math.round(price * 0.7);
         } else {
             alert("請先輸入正確的「服務項目契約價金」！");
@@ -226,13 +276,10 @@
             return;
         }
 
-        // 計算 D：指數增減率 (%)
         const D_raw = (B / C - 1) * 100;
-        // 四捨五入至小數點後四位作運算，避免浮點數誤差
         const D = Math.round(D_raw * 10000) / 10000;
         const absD = Math.abs(D);
         
-        // 計算 F：1 + 營業稅率
         const F = 1 + (tax / 100);
 
         const resultBox = document.getElementById('resultBox');
@@ -262,7 +309,6 @@
             processText += `因為 |D| (${absD.toFixed(4)}%) <= E (${E}%)\n`;
             processText += `故依契約規定，不予調整契約價金。`;
         } else {
-            // 計算調整金額：A × (|D| - E)% × F
             const diffPercent = (absD - E) / 100;
             const rawAmount = A * diffPercent * F;
             const finalAmount = Math.round(rawAmount);
